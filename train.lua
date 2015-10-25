@@ -62,6 +62,10 @@ cmd:option('-accurate_gpu_timing',0,'set this flag to 1 to get precise timings w
 -- GPU/CPU
 cmd:option('-gpuid',0,'which gpu to use. -1 = use CPU')
 cmd:option('-opencl',0,'use OpenCL (instead of CUDA)')
+-- Multi-host distributed work
+cmd:option('-distributed_host','127.0.0.1','Hostname of any one machine running this binary to connect via for work sharing.')
+cmd:option('-distributed_port',50000,'TCP port number to use for connections.')
+
 cmd:text()
 
 -- parse input params
@@ -174,6 +178,17 @@ params, grad_params = model_utils.combine_all_parameters(protos.rnn)
 if do_random_init then
     params:uniform(-0.08, 0.08) -- small uniform numbers
 end
+
+if opt.distributed_host then
+   local ok, sharedtensor = pcall(require, 'sharedtensor')
+   if not ok then
+     print('package sharedtensor not found!  Try "luarocks install sharedtensor"')
+     opt.distributed_host = 0
+   end
+   params_at_checkpoint = params:clone():float()
+   shared_params = sharedtensor.createOrFetch(opt.distributed_host, opt.distributed_port, params_at_checkpoint)
+end
+
 -- initialize the LSTM forget gates with slightly higher biases to encourage remembering in the beginning
 if opt.model == 'lstm' then
     for layer_idx = 1, opt.num_layers do
@@ -302,6 +317,13 @@ local iterations_per_epoch = loader.ntrain
 local loss0 = nil
 for i = 1, iterations do
     local epoch = i / loader.ntrain
+    if opt.distributed_host then
+      -- send updates to other workers.
+      shared_params:addFromTensor(params_at_checkpoint:add(params:float(), -1, params_at_checkpoint))
+      -- grab updates from other workers.
+      shared_params:copyToTensor(params_at_checkpoint)
+      params:copy(params_at_checkpoint)
+    end
 
     local timer = torch.Timer()
     local _, loss = optim.rmsprop(feval, params, optim_state)
