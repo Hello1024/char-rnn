@@ -121,6 +121,21 @@ It is very common in deep learning to run many different models with many differ
 
 By the way, the size of your training and validation splits are also parameters. Make sure you have a decent amount of data in your validation set or otherwise the validation performance will be noisy and not very informative.
 
+### Running on multiple machines
+
+Set the `distributed_host` flag to the IP address of one machine running `train.lua`.  Now run the same script with the same flags and same data on every machine you can find.  You can mix GPU and CPU types (at a small performance penalty).
+
+#### Amazon AWS example
+
+1. Sign up for [Amazon EC2](https://aws.amazon.com/ec2/) and create a default free-tier instance.  This sets up security groups, VPC's, subnets, etc.  Make sure you can SSH into it (you will need to download a key).
+2. Set up the [CLI interface](https://aws.amazon.com/cli/).
+3. Go and adjust the [default security group](https://console.aws.amazon.com/vpc/home?#securityGroups:) to make sure it allows inbound traffic from other machines you start (Add ALL traffic from your 172.31.0.0/16 subnet)
+4. Run the following command to set up a machine with a bunch of preinstalled ML tools and run your torch commandline
+```bash
+aws start instance whatever...
+```
+5. Run the same commandline leaving out `--private-ip-address x.x.x.x` to start new machines.   Remember to stop all the machines when you're done.
+
 ## Additional Pointers and Acknowledgements
 
 This code was originally based on Oxford University Machine Learning class [practical 6](https://github.com/oxford-cs-ml-2015/practical6), which is in turn based on [learning to execute](https://github.com/wojciechz/learning_to_execute) code from Wojciech Zaremba. Chunks of it were also developed in collaboration with my labmate [Justin Johnson](http://cs.stanford.edu/people/jcjohns/).
