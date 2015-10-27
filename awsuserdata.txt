@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd /home/ubuntu;source .bashrc;git clone https://github.com/Hello1024/char-rnn.git;cd char-rnn;luarocks install sharedtensor;th train.lua
+
+
+aws ec2 run-instances --image-id ami-b36981d8 --count 1 --key-name hello --instance-type t2.micro --private-ip-address 172.31.51.44 --user-data $'#!/bin/bash\ncd /home/ubuntu;source <(grep PATH .bashrc);export HOME=/;git clone https://github.com/Hello1024/char-rnn.git;cd char-rnn;luarocks install https://raw.githubusercontent.com/Hello1024/shared-tensor/master/sharedtensor-1.0-2.rockspec;th train.lua -distributed_host 172.31.51.44'
