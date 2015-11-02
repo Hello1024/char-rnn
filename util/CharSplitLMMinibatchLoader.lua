@@ -8,8 +8,6 @@ CharSplitLMMinibatchLoader.__index = CharSplitLMMinibatchLoader
 function CharSplitLMMinibatchLoader.create(data_dir, batch_size, seq_length, split_fractions)
     -- split_fractions is e.g. {0.9, 0.05, 0.05}
 
-    math.randomseed(os.time())
-
     local self = {}
     setmetatable(self, CharSplitLMMinibatchLoader)
 
@@ -97,6 +95,8 @@ function CharSplitLMMinibatchLoader.create(data_dir, batch_size, seq_length, spl
 
     print(string.format('data load done. Number of data batches in train: %d, val: %d, test: %d', self.ntrain, self.nval, self.ntest))
     collectgarbage()
+    math.randomseed(os.time() + os.clock())
+
     return self
 end
 
