@@ -8,6 +8,8 @@ CharSplitLMMinibatchLoader.__index = CharSplitLMMinibatchLoader
 function CharSplitLMMinibatchLoader.create(data_dir, batch_size, seq_length, split_fractions)
     -- split_fractions is e.g. {0.9, 0.05, 0.05}
 
+    math.randomseed(os.time())
+
     local self = {}
     setmetatable(self, CharSplitLMMinibatchLoader)
 
@@ -111,7 +113,8 @@ function CharSplitLMMinibatchLoader:next_batch(split_index)
         os.exit() -- crash violently
     end
     -- split_index is integer: 1 = train, 2 = val, 3 = test
-    self.batch_ix[split_index] = self.batch_ix[split_index] + 1
+    self.batch_ix[split_index] = math.random(self.split_sizes[split_index])
+    --self.batch_ix[split_index] + 1
     if self.batch_ix[split_index] > self.split_sizes[split_index] then
         self.batch_ix[split_index] = 1 -- cycle around to beginning
     end
