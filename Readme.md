@@ -132,9 +132,9 @@ Set the `distributed_host` flag to the IP address of one machine running `train.
 3. Go and adjust the [default security group](https://console.aws.amazon.com/vpc/home?#securityGroups:) to make sure it allows inbound traffic from other machines you start (Add ALL traffic from your 172.31.0.0/16 subnet)
 4. Run the following command to set up a machine with a bunch of preinstalled ML tools and run your torch commandline
 ```bash
-aws start instance whatever...
+aws ec2 run-instances --image-id ami-b36981d8 --count 1 --key-name hello --instance-type g2.2xlarge --placement AvailabilityZone=us-east-1a --private-ip-address 172.31.51.44 --user-data $'#!/bin/bash\ncd /home/ubuntu;source <(grep PATH .bashrc);export HOME=/;git clone https://github.com/Hello1024/char-rnn.git;cd char-rnn;luarocks install https://raw.githubusercontent.com/Hello1024/shared-tensor/master/sharedtensor-1.0-2.rockspec; while true; do th train.lua -distributed_host 172.31.51.44; done'
 ```
-5. Run the same commandline leaving out `--private-ip-address x.x.x.x` to start new machines.   Remember to stop all the machines when you're done.
+5. Run the same commandline leaving out `--private-ip-address x.x.x.x` to start new machines.  `instance-type` `t2.micro` is handy for testing.   Remember to stop all the machines when you're done.
 
 ## Additional Pointers and Acknowledgements
 
